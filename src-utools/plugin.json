@@ -1,0 +1,23 @@
+{
+  "$schema": "../node_modules/utools-api-types/resource/utools.schema.json",
+  "main": "dist/index.html",
+  "preload": "preload.js",
+  "logo": "public/logo.png",
+  "platform": ["win32", "darwin", "linux"],
+  "development": {
+    "main": "http://localhost:5173/"
+  },
+  "pluginSetting": {
+    "single": true,
+    "height": 0
+  },
+  "features": [
+    {
+      "code": "货币汇率",
+      "explain": "货币汇率",
+      "icon": "public/logo.png",
+      "platform": ["win32", "darwin"],
+      "cmds": ["汇率", "货币", "汇率计算", "货币计算", "汇率转换", "货币转换"]
+    }
+  ]
+}
