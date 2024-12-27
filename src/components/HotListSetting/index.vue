@@ -7,7 +7,7 @@
     @cancel="handleCancel"
     :ok-text="'保存设置'"
     :cancel-text="'取消'"
-    :modal-style="{ width: '680px' }">
+    :modal-style="{ width: '90vw' }">
     <div class="setting_content">
       <div class="setting_tip">
         <icon-info-circle />
@@ -56,6 +56,18 @@
 import { ref, watch } from 'vue';
 import VueDraggable from 'vuedraggable';
 import TransitionGroupItem from '@/components/TransitionGroupItem/index.vue';
+import { useEventListener } from '@vueuse/core';
+
+const event = useEventListener(document, 'keydown', (e) => handleKeydown(e));
+
+// 监听按下 esc
+const handleKeydown = (e) => {
+  if (e.key === 'Escape' && visible.value) {
+    closeModal();
+    e.stopPropagation();
+    e.preventDefault();
+  }
+};
 
 const props = defineProps({
   modelValue: {

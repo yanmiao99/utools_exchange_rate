@@ -5,6 +5,7 @@ import { queryExchangeRate, queryExchangeRateHistory } from '@/api/index';
 import HotListSetting from '@/components/HotListSetting/index.vue';
 import rateList from './rateList';
 import PageTitle from '@/components/PageTitle/index.vue';
+import CurrencyHistory from '@/components/CurrencyHistory/index.vue';
 // 本地存储的 key
 const STORAGE_KEY = 'RATE_LIST_SETTINGS';
 
@@ -12,6 +13,8 @@ const settingVisible = ref(false);
 const sourceAmount = ref(1); // 默认金额
 const sourceCurrency = ref('CNY'); // 默认源货币
 const enabledCurrencies = ref([]); // 存储启用的货币列表
+const showHistory = ref(false);
+const selectedCurrency = ref(null);
 
 onMounted(() => {
   const settings = getSettings();
@@ -59,7 +62,7 @@ const handleSettingSave = (settings) => {
   }));
   window.utools.dbStorage.setItem(STORAGE_KEY, cleanSettings);
 
-  // 更新启用的货币列表
+  // 更新启���的货币列表
   updateEnabledCurrencies(cleanSettings);
 
   // 查询汇率
@@ -103,6 +106,11 @@ const getSettings = () => {
 // 获取货币图标
 const getCurrencyIcon = (name) => {
   return `https://files.codelife.cc/itab/widget/exchangerate/${name}.png`;
+};
+
+const handleCurrencyClick = (currency) => {
+  selectedCurrency.value = currency;
+  showHistory.value = true;
 };
 </script>
 
@@ -157,7 +165,8 @@ const getCurrencyIcon = (name) => {
       <div
         v-for="currency in enabledCurrencies"
         :key="currency.name"
-        class="currency_item">
+        class="currency_item"
+        @click="handleCurrencyClick(currency)">
         <div class="currency_icon">
           <img
             :src="getCurrencyIcon(currency.name)"
@@ -178,6 +187,11 @@ const getCurrencyIcon = (name) => {
       v-model="settingVisible"
       :settings="getSettings()"
       @save="handleSettingSave" />
+
+    <CurrencyHistory
+      v-model="showHistory"
+      :currency="selectedCurrency"
+      :source-currency="sourceCurrency" />
   </div>
 </template>
 
@@ -267,6 +281,7 @@ const getCurrencyIcon = (name) => {
     border: 1px solid var(--color-border-2);
     border-radius: 8px;
     transition: all 0.3s ease;
+    cursor: pointer;
 
     &:hover {
       transform: translateY(-2px);
