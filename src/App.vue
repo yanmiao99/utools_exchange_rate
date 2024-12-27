@@ -38,13 +38,13 @@ import dayjs from 'dayjs';
 
 const route = useRoute();
 const router = useRouter();
-const selectedKeys = ref(['/arrange']);
+const selectedKeys = ref(['/home']);
 
 const routerMenu = ref([
   {
     key: '/home',
-    icon: 'IconFire',
-    title: '今日热榜',
+    icon: 'IconTranslate',
+    title: '货币转换',
   },
 ]);
 

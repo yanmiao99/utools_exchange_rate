@@ -1,7 +1,7 @@
 <template>
   <a-modal
     v-model:visible="visible"
-    title="热榜设置"
+    title="货币设置"
     @ok="handleSave"
     :draggable="true"
     @cancel="handleCancel"

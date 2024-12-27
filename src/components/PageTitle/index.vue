@@ -1,6 +1,6 @@
 <template>
   <div class="page_title_container">
-    <div class="page_title">{{ holidayData.year }} 年{{ title }}</div>
+    <div class="page_title">{{ title }}</div>
     <div class="page_actions">
       <div class="extra_actions">
         <slot name="extra"></slot>
@@ -13,7 +13,6 @@
 </template>
 
 <script setup>
-import { holidayData } from '@/store/AppStore';
 import ThemeSwitch from '@/components/ThemeSwitch/index.vue';
 import FishStats from '@/components/FishStats/index.vue';
 import Appreciate from '@/components/Appreciate/index.vue';
@@ -32,14 +31,13 @@ defineProps({
   justify-content: space-between;
   align-items: center;
   height: 60px;
-  padding: 0 32px;
+  padding: 0;
   position: sticky;
   top: 0;
   z-index: 100;
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
   background-color: var(--color-bg-2);
-  border-bottom: 1px solid var(--color-border);
   transition: all 0.3s ease;
 
   &::before {
