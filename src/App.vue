@@ -1,6 +1,6 @@
 <template>
   <a-layout :class="{ main: true, 'bg-color': true, detach: detach }">
-    <a-layout-sider
+    <!-- <a-layout-sider
       collapsed
       style="z-index: 50">
       <a-menu
@@ -16,7 +16,7 @@
           {{ item.title }}
         </a-menu-item>
       </a-menu>
-    </a-layout-sider>
+    </a-layout-sider> -->
     <a-layout-content class="container">
       <router-view v-slot="{ Component }">
         <transition
@@ -38,11 +38,11 @@ import dayjs from 'dayjs';
 
 const route = useRoute();
 const router = useRouter();
-const selectedKeys = ref(['/home']);
+const selectedKeys = ref(['/']);
 
 const routerMenu = ref([
   {
-    key: '/home',
+    key: '/',
     icon: 'IconTranslate',
     title: '货币转换',
   },
@@ -99,7 +99,6 @@ const checkPayday = () => {
 };
 
 utools.onPluginEnter((action) => {
-  console.log(action);
   detach.value = utools.getWindowType() !== 'main';
   checkPayday();
 });
@@ -108,8 +107,6 @@ onMounted(() => {
   fetchHolidayData();
   checkPayday();
 });
-
-const fishStatsRef = ref(null);
 </script>
 <style scoped lang="less">
 .main {

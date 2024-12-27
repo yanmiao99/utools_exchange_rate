@@ -30,7 +30,6 @@ defineProps({
   display: flex;
   justify-content: space-between;
   align-items: center;
-  height: 60px;
   padding: 0;
   position: sticky;
   top: 0;
@@ -39,6 +38,7 @@ defineProps({
   -webkit-backdrop-filter: blur(8px);
   background-color: var(--color-bg-2);
   transition: all 0.3s ease;
+  margin-bottom: 12px;
 
   &::before {
     content: '';

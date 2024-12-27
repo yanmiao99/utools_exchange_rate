@@ -18,7 +18,6 @@ import {
 
 import * as echarts from 'echarts';
 import { useColorMode } from '@/hooks/useColorMode';
-
 const colorMode = useColorMode();
 
 const chartsDom = ref(null);
@@ -47,7 +46,6 @@ watch(
     }
   },
   {
-    // immediate: true,
     deep: true,
   }
 );

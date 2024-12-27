@@ -21,6 +21,7 @@
     </a-tooltip>
 
     <a-modal
+      :esc-to-close="false"
       v-model:visible="showModal"
       title="赞赏"
       :footer="false"
@@ -40,6 +41,19 @@
 import { ref, computed } from 'vue';
 import { IconHeartFill } from '@arco-design/web-vue/es/icon';
 import dayjs from 'dayjs';
+
+import { useEventListener } from '@vueuse/core';
+
+useEventListener(document, 'keydown', (e) => handleKeydown(e));
+
+// 监听按下 esc
+const handleKeydown = (e) => {
+  if (e.key === 'Escape' && showModal.value) {
+    e.stopPropagation();
+    e.preventDefault();
+    showModal.value = false;
+  }
+};
 
 const showModal = ref(false);
 const visible = ref(true);

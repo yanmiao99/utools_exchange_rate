@@ -4,6 +4,7 @@
     v-model:visible="visible"
     @cancel="handleCancel"
     :footer="false"
+    :esc-to-close="false"
     :modal-style="{ width: '90vw' }">
     <template #title> 汇率趋势 </template>
 
@@ -85,14 +86,14 @@ import { queryExchangeRateHistory } from '@/api/index';
 import BaseCharts from '@/components/BaseCharts/index.vue';
 import { useEventListener } from '@vueuse/core';
 
-const event = useEventListener(document, 'keydown', (e) => handleKeydown(e));
+useEventListener(document, 'keydown', (e) => handleKeydown(e));
 
 // 监听按下 esc
 const handleKeydown = (e) => {
   if (e.key === 'Escape' && visible.value) {
-    closeModal();
     e.stopPropagation();
     e.preventDefault();
+    visible.value = false;
   }
 };
 
@@ -238,17 +239,21 @@ const updateChartOptions = () => {
       axisLabel: {
         rotate: 45,
         hideOverlap: true, // 隐藏重叠的标签
+        color: '#4993FF',
       },
     },
     yAxis: {
       type: 'value',
       scale: true,
+      color: 'skyblue',
       axisLabel: {
+        color: '#4993FF',
         formatter: (value) => value.toFixed(4),
       },
       splitLine: {
         lineStyle: {
           type: 'dashed',
+          color: 'grey',
         },
       },
     },
@@ -327,9 +332,10 @@ const handleCancel = () => {
       gap: 12px;
 
       .currency_icon {
-        width: 32px;
-        height: 32px;
+        width: 45px;
+        height: 45px;
         border-radius: 6px;
+        border: 1px solid var(--color-border-2);
       }
 
       .currency_rate {

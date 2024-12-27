@@ -1,12 +1,13 @@
 <script setup>
 import { ref, onMounted, watch } from 'vue';
 import { Message } from '@arco-design/web-vue';
-import { queryExchangeRate, queryExchangeRateHistory } from '@/api/index';
+import { queryExchangeRate } from '@/api/index';
 import HotListSetting from '@/components/HotListSetting/index.vue';
 import rateList from './rateList';
 import PageTitle from '@/components/PageTitle/index.vue';
 import CurrencyHistory from '@/components/CurrencyHistory/index.vue';
 import dayjs from 'dayjs';
+import { CountTo } from 'vue3-count-to';
 
 // 本地存储的 key
 const STORAGE_KEY = 'RATE_LIST_SETTINGS';
@@ -18,7 +19,10 @@ const enabledCurrencies = ref([]); // 存储启用的货币列表
 const showHistory = ref(false); // 汇率趋势弹窗
 const selectedCurrency = ref(null); // 选中的货币
 
+const sourceAmountRef = ref(null); // 金额输入框
+
 onMounted(() => {
+  sourceAmountRef.value.focus();
   const settings = getSettings();
   updateEnabledCurrencies(settings);
   queryRate();
@@ -27,7 +31,7 @@ onMounted(() => {
 // 查询汇率
 const queryRate = async () => {
   if (!sourceAmount.value) return;
-  // 获取所有启用货币的代码，用逗号连接
+  // 获取���有启用货币的代码，用逗号连接
   const targetCurrencies = enabledCurrencies.value.map((c) => c.name).join(',');
 
   // 一次性查询所有目标货币的汇率
@@ -90,17 +94,17 @@ const getSettings = () => {
       .map((p) => ({
         name: p.name,
         label: p.label,
-        enabled: true,
+        enabled: false, // 新增的默认不启用
         order: settings.length + 1,
       }));
 
     return [...settings, ...newPlatforms];
   }
 
-  // 首次使用时的默认设置
+  // 首次使用时的默认设置，只启用前9个
   return rateList.map((item, index) => ({
     ...item,
-    enabled: true,
+    enabled: index < 9, // 只有前9个为true
     order: index,
   }));
 };
@@ -134,7 +138,7 @@ const handleCurrencyClick = (currency) => {
     </PageTitle>
 
     <a-alert>
-      每天汇率数据更新时间：{{
+      汇率数据更新时间：{{
         dayjs().hour(8).minute(0).second(0).format('YYYY-MM-DD HH:mm:ss')
       }}
     </a-alert>
@@ -144,13 +148,14 @@ const handleCurrencyClick = (currency) => {
         <a-input-number
           v-model="sourceAmount"
           :min="0"
+          ref="sourceAmountRef"
           placeholder="请输入金额"
           allow-clear
           class="amount_input" />
 
         <a-select
           v-model="sourceCurrency"
-          placeholder="选择货币"
+          placeholder="选���货币"
           class="currency_select">
           <a-option
             v-for="item in rateList"
@@ -165,6 +170,14 @@ const handleCurrencyClick = (currency) => {
             </div>
           </a-option>
         </a-select>
+      </div>
+      <div class="calculator_tips">
+        <a-tooltip
+          content="汇率仅供参考，请以实际交易为准"
+          position="right">
+          <icon-info-circle />
+          <span>请输入数字,并且按回车键查询</span>
+        </a-tooltip>
       </div>
     </div>
 
@@ -185,7 +198,11 @@ const handleCurrencyClick = (currency) => {
             {{ currency.name }} - {{ currency.label }}
           </div>
           <div class="currency_value">
-            {{ currency.value || '0.00' }}
+            <CountTo
+              :start-val="0"
+              :end-val="Number(currency.value) || 0"
+              :duration="500"
+              :decimals="2" />
           </div>
         </div>
       </div>
@@ -211,7 +228,7 @@ const handleCurrencyClick = (currency) => {
     background: var(--color-bg-2);
     border-radius: 8px;
     border: 1px solid var(--color-border-2);
-    margin-top: 24px;
+    margin-top: 10px;
 
     .calculator_main {
       display: flex;
@@ -221,6 +238,14 @@ const handleCurrencyClick = (currency) => {
       .amount_input {
         flex: 1;
       }
+    }
+
+    .calculator_tips {
+      margin-top: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--color-text-2);
     }
   }
 }
@@ -275,7 +300,7 @@ const handleCurrencyClick = (currency) => {
 }
 
 .currency_grid {
-  margin-top: 24px;
+  margin-top: 10px;
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 16px;

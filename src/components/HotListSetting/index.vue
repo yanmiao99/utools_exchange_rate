@@ -1,5 +1,6 @@
 <template>
   <a-modal
+    :esc-to-close="false"
     v-model:visible="visible"
     title="货币设置"
     @ok="handleSave"
@@ -11,7 +12,8 @@
     <div class="setting_content">
       <div class="setting_tip">
         <icon-info-circle />
-        <span>拖拽排序并选择需要显示的货币</span>
+        <span>拖拽排序并选择需要显示的货币（最多9个）</span>
+        <span class="enabled_count">已启用: {{ enabledCount }}/9</span>
       </div>
       <VueDraggable
         v-model="localSettings"
@@ -42,6 +44,8 @@
                 <a-switch
                   type="round"
                   v-model="element.enabled"
+                  :disabled="!element.enabled && enabledCount >= 9"
+                  @change="() => handleSwitchChange(element)"
                   size="small" />
               </div>
             </div>
@@ -53,17 +57,18 @@
 </template>
 
 <script setup>
-import { ref, watch } from 'vue';
+import { ref, watch, computed, onMounted, onUnmounted } from 'vue';
 import VueDraggable from 'vuedraggable';
 import TransitionGroupItem from '@/components/TransitionGroupItem/index.vue';
 import { useEventListener } from '@vueuse/core';
+import { Message } from '@arco-design/web-vue';
 
-const event = useEventListener(document, 'keydown', (e) => handleKeydown(e));
+useEventListener(document, 'keydown', (e) => handleKeydown(e));
 
 // 监听按下 esc
 const handleKeydown = (e) => {
   if (e.key === 'Escape' && visible.value) {
-    closeModal();
+    handleCancel();
     e.stopPropagation();
     e.preventDefault();
   }
@@ -84,6 +89,20 @@ const emit = defineEmits(['update:modelValue', 'save']);
 
 const visible = ref(false);
 const localSettings = ref([]);
+
+// 计算已启用的数量
+const enabledCount = computed(() => {
+  return localSettings.value.filter((item) => item.enabled).length;
+});
+
+// 处理开关切换
+const handleSwitchChange = (item) => {
+  if (!item.enabled && enabledCount.value >= 9) {
+    Message.warning('最多只能启用9个货币');
+    item.enabled = false;
+    return;
+  }
+};
 
 // 监听 modelValue 变化
 watch(
@@ -150,6 +169,15 @@ const handleCancel = () => {
     display: flex;
     align-items: center;
     gap: 8px;
+
+    .enabled_count {
+      margin-left: auto;
+      padding: 2px 8px;
+      background: var(--color-fill-2);
+      border-radius: 4px;
+      font-size: 12px;
+      color: var(--color-text-2);
+    }
   }
 
   .platform_item {

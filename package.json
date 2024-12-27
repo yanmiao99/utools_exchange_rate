@@ -25,6 +25,7 @@
     "radash": "^12.1.0",
     "vue": "^3.4.15",
     "vue-router": "^4.2.5",
+    "vue3-count-to": "^1.1.2",
     "vuedraggable": "^4.1.0"
   },
   "devDependencies": {
