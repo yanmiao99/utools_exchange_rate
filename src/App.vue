@@ -102,21 +102,6 @@ utools.onPluginEnter((action) => {
   console.log(action);
   detach.value = utools.getWindowType() !== 'main';
   checkPayday();
-
-  const map = {
-    请假攻略: '/guide',
-    请假指南: '/guide',
-    假期余额: '/balance',
-    假期安排: '/arrange',
-    今年假期: '/arrange',
-    放假安排: '/arrange',
-    今日热榜: '/hotList',
-    热搜榜单: '/hotList',
-  };
-  const payload = map[action.payload];
-  if (payload) {
-    router.push(payload);
-  }
 });
 
 onMounted(() => {

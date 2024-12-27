@@ -2,48 +2,68 @@
   <a-modal
     v-if="currency"
     v-model:visible="visible"
-    :title="`${currency.name} - ${currency.label} 汇率走势`"
     @cancel="handleCancel"
     :footer="false"
     :modal-style="{ width: '90vw' }">
+    <template #title> 汇率趋势 </template>
+
     <div class="history_content">
       <div class="history_header">
-        <div class="current_rate">
-          <div class="currency_info">
-            <img
-              class="currency_icon"
-              :src="getCurrencyIcon(currency.name)"
-              :alt="currency.name" />
+        <div class="currency_info">
+          <img
+            class="currency_icon"
+            :src="getCurrencyIcon(currency.name)"
+            :alt="currency.name" />
+          <div class="currency_rate">
+            <div class="rate_info">
+              {{ currency.name }} - {{ currency.label }}
+            </div>
             <div class="rate_info">
               <span class="label">当前汇率：</span>
               <span class="value">{{ currency.value || '--' }}</span>
             </div>
           </div>
+        </div>
+
+        <div class="currency_right">
           <div class="stats_info">
             <div class="stat_item">
               <span class="label">最高：</span>
-              <span class="value">{{ stats.max?.toFixed(4) || '--' }}</span>
+              <span
+                class="value"
+                style="color: #ff7d00"
+                >{{ stats.max?.toFixed(4) || '--' }}</span
+              >
             </div>
             <div class="stat_item">
               <span class="label">最低：</span>
-              <span class="value">{{ stats.min?.toFixed(4) || '--' }}</span>
+              <span
+                class="value"
+                style="color: #00b42a"
+                >{{ stats.min?.toFixed(4) || '--' }}</span
+              >
             </div>
             <div class="stat_item">
               <span class="label">平均：</span>
-              <span class="value">{{ stats.avg?.toFixed(4) || '--' }}</span>
+              <span
+                class="value"
+                style="color: #00b42a"
+                >{{ stats.avg?.toFixed(4) || '--' }}</span
+              >
             </div>
           </div>
-        </div>
-        <div class="date_select">
-          <a-radio-group
-            v-model="dateRange"
-            type="button">
-            <a-radio value="48h">48小时</a-radio>
-            <a-radio value="1w">一周</a-radio>
-            <a-radio value="1m">一个月</a-radio>
-            <a-radio value="6m">六个月</a-radio>
-            <a-radio value="1y">一年</a-radio>
-          </a-radio-group>
+
+          <div class="date_select">
+            <a-radio-group
+              v-model="dateRange"
+              type="button">
+              <a-radio value="48h">48小时</a-radio>
+              <a-radio value="1w">一周</a-radio>
+              <a-radio value="1m">一个月</a-radio>
+              <a-radio value="6m">六个月</a-radio>
+              <a-radio value="1y">一年</a-radio>
+            </a-radio-group>
+          </div>
         </div>
       </div>
 
@@ -51,7 +71,6 @@
         :loading="loading"
         dot>
         <BaseCharts
-          style="width: 100%"
           height="300px"
           :options="chartOptions" />
       </a-spin>
@@ -191,6 +210,8 @@ const updateChartOptions = () => {
   const dates = historyData.value.time;
   const values = historyData.value.value;
 
+  if (!dates?.length || !values?.length) return;
+
   // 计算统计数据
   calculateStats(values);
 
@@ -198,70 +219,25 @@ const updateChartOptions = () => {
     grid: {
       top: 40,
       right: 20,
-      bottom: 40,
-      left: 60,
-      containLabel: true, // 确保坐标轴标签不超出容器
+      bottom: 0,
+      left: 20,
+      containLabel: true,
     },
     tooltip: {
-      show: true,
       trigger: 'axis',
-      backgroundColor: 'rgba(255, 255, 255, 0.9)',
-      borderColor: '#ccc',
-      borderWidth: 1,
-      textStyle: {
-        color: '#333',
-      },
+      show: true,
       axisPointer: {
         type: 'line',
-        lineStyle: {
-          color: '#ccc',
-          width: 1,
-          type: 'dashed',
-        },
-      },
-      formatter: (params) => {
-        const data = params[0];
-        if (!data) return '';
-
-        const date = new Date(data.axisValue);
-        let timeStr;
-
-        // 根据时间范围显示不同格式
-        if (dateRange.value === '48h' || dateRange.value === '1w') {
-          timeStr = `${date.getFullYear()}-${String(
-            date.getMonth() + 1
-          ).padStart(2, '0')}-${String(date.getDate()).padStart(
-            2,
-            '0'
-          )} ${String(date.getHours()).padStart(2, '0')}:00`;
-        } else {
-          timeStr = `${date.getFullYear()}-${String(
-            date.getMonth() + 1
-          ).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
-        }
-
-        return `
-          <div style="padding: 8px">
-            <div style="margin-bottom: 8px; font-size: 13px; color: #666;">
-              ${timeStr}
-            </div>
-            <div style="display: flex; align-items: center; gap: 8px; font-size: 14px;">
-              <span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background-color: ${
-                data.color
-              };"></span>
-              <span style="color: #333;">汇率：${Number(data.value).toFixed(
-                4
-              )}</span>
-            </div>
-          </div>
-        `;
+        snap: true,
       },
     },
     xAxis: {
       type: 'category',
       data: dates,
+      boundaryGap: false, // 坐标轴两边留白策略
       axisLabel: {
         rotate: 45,
+        hideOverlap: true, // 隐藏重叠的标签
       },
     },
     yAxis: {
@@ -290,16 +266,41 @@ const updateChartOptions = () => {
           opacity: 0.1,
         },
         markPoint: {
-          data: [
-            { type: 'max', name: '最高值' },
-            { type: 'min', name: '最低值' },
-          ],
-        },
-        markLine: {
-          data: [{ type: 'average', name: '平均值' }],
-          label: {
-            formatter: '{b}: {c}',
+          symbol: 'circle',
+          symbolSize: 8,
+          itemStyle: {
+            borderWidth: 2,
+            borderColor: '#fff',
+            shadowColor: 'rgba(0, 0, 0, 0.1)',
+            shadowBlur: 4,
           },
+          label: {
+            position: 'top',
+            distance: 8,
+            formatter: (params) => {
+              return `${params.name}\n${params.value.toFixed(4)}`;
+            },
+            backgroundColor: 'rgba(255, 255, 255, 0.9)',
+            padding: [4, 8],
+            borderRadius: 4,
+            color: '#333',
+          },
+          data: [
+            {
+              type: 'max',
+              name: '最高',
+              itemStyle: {
+                color: '#ff7d00',
+              },
+            },
+            {
+              type: 'min',
+              name: '最低',
+              itemStyle: {
+                color: '#00b42a',
+              },
+            },
+          ],
         },
       },
     ],
@@ -317,22 +318,21 @@ const handleCancel = () => {
   .history_header {
     display: flex;
     justify-content: space-between;
-    align-items: flex-start;
-    margin-bottom: 24px;
+    align-items: center;
+    margin-bottom: 10px;
 
-    .current_rate {
-      .currency_info {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        margin-bottom: 12px;
+    .currency_info {
+      display: flex;
+      align-items: center;
+      gap: 12px;
 
-        .currency_icon {
-          width: 32px;
-          height: 32px;
-          border-radius: 6px;
-        }
+      .currency_icon {
+        width: 32px;
+        height: 32px;
+        border-radius: 6px;
+      }
 
+      .currency_rate {
         .rate_info {
           .label {
             color: var(--color-text-2);
@@ -346,12 +346,36 @@ const handleCancel = () => {
           }
         }
       }
+    }
+
+    .currency_right {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
 
       .stats_info {
         display: flex;
         gap: 16px;
+        padding: 10px;
+        background: var(--color-fill-2);
+        border-radius: 8px;
 
         .stat_item {
+          position: relative;
+          padding-right: 16px;
+          white-space: nowrap;
+
+          &:not(:last-child)::after {
+            content: '';
+            position: absolute;
+            right: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 1px;
+            height: 14px;
+            background: var(--color-border-2);
+          }
+
           .label {
             color: var(--color-text-3);
             font-size: 13px;
@@ -359,17 +383,19 @@ const handleCancel = () => {
           }
 
           .value {
-            color: var(--color-text-2);
+            color: var(--color-text-1);
             font-size: 13px;
+            font-weight: 500;
           }
         }
       }
-    }
 
-    .date_select {
-      :deep(.arco-radio-group-button) {
-        .arco-radio {
-          padding: 0 12px;
+      .date_select {
+        white-space: nowrap;
+        :deep(.arco-radio-group-button) {
+          .arco-radio {
+            padding: 0 12px;
+          }
         }
       }
     }

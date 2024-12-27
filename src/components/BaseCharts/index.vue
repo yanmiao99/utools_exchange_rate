@@ -20,7 +20,7 @@ import * as echarts from 'echarts';
 import { useColorMode } from '@/hooks/useColorMode';
 
 const colorMode = useColorMode();
-const chartRef = ref(null);
+
 const chartsDom = ref(null);
 
 const props = defineProps({
@@ -33,8 +33,7 @@ const props = defineProps({
     default: () => ({}),
   },
 });
-
-// 监听主题变化
+const chartRef = ref(null);
 watch(
   () => ({
     darkMode: colorMode.value,
@@ -48,59 +47,32 @@ watch(
     }
   },
   {
-    deep: true,
-  }
-);
-
-// 监听 options 变化
-watch(
-  () => props.options,
-  () => {
-    nextTick(() => {
-      if (chartsDom.value) {
-        updateChartOptions();
-      } else {
-        initCharts();
-      }
-    });
-  },
-  {
+    // immediate: true,
     deep: true,
   }
 );
 
 const initCharts = () => {
-  if (!chartRef.value) return;
-
-  let theme = colorMode.value === 'dark' ? 'dark' : '';
-
-  // 确保容器有宽高
-  const container = chartRef.value;
-  if (container.offsetHeight === 0) {
-    container.style.height = props.height;
+  let theme;
+  if (colorMode.value === 'dark') {
+    theme = 'dark';
+  } else {
+    theme = '';
   }
 
-  // 初始化图表
-  const myChart = echarts.init(container, theme);
-  chartsDom.value = myChart;
-  updateChartOptions();
-};
-
-const updateChartOptions = () => {
-  if (!chartsDom.value) return;
-
-  chartsDom.value.setOption(
-    {
+  const myChart = echarts.init(chartRef.value, theme);
+  watchEffect(() => {
+    myChart.setOption({
+      // 透明背景
       backgroundColor: 'rgba(0,0,0,0)',
       ...props.options,
-    },
-    true
-  ); // true 表示不合并之前的配置
+    });
+  });
+  chartsDom.value = myChart;
 };
-
 // 窗口resize事件
 const handleChartResize = () => {
-  chartsDom.value?.resize();
+  chartsDom.value && chartsDom.value.resize();
 };
 
 const disposeCharts = () => {
@@ -110,13 +82,15 @@ const disposeCharts = () => {
   }
 };
 
-onMounted(() => {
+onBeforeMount(() => {
   nextTick(() => {
     initCharts();
-    window.addEventListener('resize', handleChartResize);
   });
 });
 
+onMounted(() => {
+  window.addEventListener('resize', handleChartResize);
+});
 onBeforeUnmount(() => {
   window.removeEventListener('resize', handleChartResize);
   disposeCharts();
@@ -126,6 +100,5 @@ onBeforeUnmount(() => {
 <style lang="less" scoped>
 .charts {
   width: 100%;
-  min-height: 100px;
 }
 </style>

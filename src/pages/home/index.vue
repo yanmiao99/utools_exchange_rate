@@ -6,15 +6,17 @@ import HotListSetting from '@/components/HotListSetting/index.vue';
 import rateList from './rateList';
 import PageTitle from '@/components/PageTitle/index.vue';
 import CurrencyHistory from '@/components/CurrencyHistory/index.vue';
+import dayjs from 'dayjs';
+
 // 本地存储的 key
 const STORAGE_KEY = 'RATE_LIST_SETTINGS';
 
-const settingVisible = ref(false);
-const sourceAmount = ref(1); // 默认金额
+const settingVisible = ref(false); // 设置弹窗
+const sourceAmount = ref(100); // 默认金额
 const sourceCurrency = ref('CNY'); // 默认源货币
 const enabledCurrencies = ref([]); // 存储启用的货币列表
-const showHistory = ref(false);
-const selectedCurrency = ref(null);
+const showHistory = ref(false); // 汇率趋势弹窗
+const selectedCurrency = ref(null); // 选中的货币
 
 onMounted(() => {
   const settings = getSettings();
@@ -62,7 +64,7 @@ const handleSettingSave = (settings) => {
   }));
   window.utools.dbStorage.setItem(STORAGE_KEY, cleanSettings);
 
-  // 更新启���的货币列表
+  // 更新启用的货币列表
   updateEnabledCurrencies(cleanSettings);
 
   // 查询汇率
@@ -130,6 +132,12 @@ const handleCurrencyClick = (currency) => {
         </a-tooltip>
       </template>
     </PageTitle>
+
+    <a-alert>
+      每天汇率数据更新时间：{{
+        dayjs().hour(8).minute(0).second(0).format('YYYY-MM-DD HH:mm:ss')
+      }}
+    </a-alert>
 
     <div class="rate_calculator">
       <div class="calculator_main">
@@ -203,6 +211,7 @@ const handleCurrencyClick = (currency) => {
     background: var(--color-bg-2);
     border-radius: 8px;
     border: 1px solid var(--color-border-2);
+    margin-top: 24px;
 
     .calculator_main {
       display: flex;
