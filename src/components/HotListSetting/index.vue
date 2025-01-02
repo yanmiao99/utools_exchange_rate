@@ -10,13 +10,23 @@
     :cancel-text="'取消'"
     :modal-style="{ width: '90vw' }">
     <div class="setting_content">
+      <div class="search_wrapper">
+        <a-input-search
+          v-model="searchText"
+          :style="{ width: '100%' }"
+          placeholder="支持多个搜索，如：CNY,USD 或 人民币,美元"
+          allow-clear
+          @clear="handleClearSearch" />
+      </div>
+
       <div class="setting_tip">
         <icon-info-circle />
         <span>拖拽排序并选择需要显示的货币（最多9个）</span>
         <span class="enabled_count">已启用: {{ enabledCount }}/9</span>
       </div>
+
       <VueDraggable
-        v-model="localSettings"
+        v-model="filteredSettings"
         item-key="name"
         handle=".drag_handle"
         ghost-class="ghost"
@@ -52,6 +62,13 @@
           </transition-group-item>
         </template>
       </VueDraggable>
+
+      <div
+        v-if="filteredSettings.length === 0"
+        class="no_result">
+        <icon-exclamation-circle-fill />
+        <span>未找到匹配的货币</span>
+      </div>
     </div>
   </a-modal>
 </template>
@@ -89,6 +106,28 @@ const emit = defineEmits(['update:modelValue', 'save']);
 
 const visible = ref(false);
 const localSettings = ref([]);
+const searchText = ref('');
+
+// 计算过滤后的列表
+const filteredSettings = computed(() => {
+  if (!searchText.value) return localSettings.value;
+
+  const searchTerms = searchText.value
+    .toLowerCase()
+    .split(',')
+    .map((term) => term.trim())
+    .filter(Boolean); // 过滤掉空字符串
+
+  if (searchTerms.length === 0) return localSettings.value;
+
+  return localSettings.value.filter((item) => {
+    return searchTerms.some(
+      (term) =>
+        item.name.toLowerCase().includes(term) ||
+        item.label.toLowerCase().includes(term)
+    );
+  });
+});
 
 // 计算已启用的数量
 const enabledCount = computed(() => {
@@ -97,6 +136,13 @@ const enabledCount = computed(() => {
 
 // 处理开关切换
 const handleSwitchChange = (item) => {
+  // 最少保留一个货币
+  if (!item.enabled && enabledCount.value < 1) {
+    Message.warning('最少保留一个货币');
+    item.enabled = true;
+    return;
+  }
+
   if (!item.enabled && enabledCount.value >= 9) {
     Message.warning('最多只能启用9个货币');
     item.enabled = false;
@@ -143,12 +189,19 @@ const platformIcon = (name) => {
 // 保存设置
 const handleSave = () => {
   emit('save', localSettings.value);
+  handleClearSearch();
   visible.value = false;
 };
 
 // 取消设置
 const handleCancel = () => {
+  handleClearSearch();
   visible.value = false;
+};
+
+// 清除搜索
+const handleClearSearch = () => {
+  searchText.value = '';
 };
 </script>
 
@@ -158,6 +211,21 @@ const handleCancel = () => {
   max-height: 300px;
   overflow-y: auto;
   overflow-x: hidden;
+
+  .search_wrapper {
+    margin-bottom: 16px;
+
+    :deep(.arco-input-wrapper) {
+      background-color: var(--color-bg-2);
+      border-color: var(--color-border-2);
+
+      &:hover,
+      &:focus {
+        border-color: var(--color-primary);
+        background-color: var(--color-bg-1);
+      }
+    }
+  }
 
   .setting_tip {
     margin-bottom: 20px;
@@ -340,6 +408,7 @@ const handleCancel = () => {
     gap: 16px;
     padding: 2px;
     position: relative;
+    min-height: 100px;
   }
 
   // 优化拖拽时的动画
@@ -356,6 +425,25 @@ const handleCancel = () => {
   // 列表项移动动画
   .flip-list-move {
     transition: transform 0.3s ease;
+  }
+
+  // 添加无搜索结果样式
+  .no_result {
+    padding: 24px;
+    text-align: center;
+    color: var(--color-text-3);
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    background: var(--color-fill-2);
+    border-radius: 8px;
+    margin-top: 16px;
+
+    .arco-icon {
+      font-size: 18px;
+    }
   }
 }
 

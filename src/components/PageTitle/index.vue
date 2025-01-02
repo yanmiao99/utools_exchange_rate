@@ -1,13 +1,21 @@
 <template>
   <div class="page_title_container">
-    <div class="page_title">{{ title }}</div>
+    <div class="page_info">
+      <div class="page_title">{{ title }}</div>
+      <div
+        class="page_sub_title"
+        v-if="subTitle">
+        {{ subTitle }}
+      </div>
+    </div>
+
     <div class="page_actions">
       <div class="extra_actions">
         <slot name="extra"></slot>
       </div>
+      <Appreciate />
       <FishStats />
       <ThemeSwitch />
-      <Appreciate />
     </div>
   </div>
 </template>
@@ -21,6 +29,10 @@ defineProps({
   title: {
     type: String,
     required: true,
+  },
+  subTitle: {
+    type: String,
+    default: '',
   },
 });
 </script>
@@ -49,11 +61,23 @@ defineProps({
     z-index: -1;
   }
 
-  .page_title {
-    font-size: 24px;
-    font-weight: bold;
-    text-align: left;
-    color: var(--color-text-1);
+  .page_info {
+    display: flex;
+    align-items: flex-end;
+    gap: 4px;
+
+    .page_title {
+      font-size: 24px;
+      font-weight: bold;
+      text-align: left;
+      color: var(--color-text-1);
+    }
+
+    .page_sub_title {
+      font-size: 14px;
+      color: var(--color-text-3);
+      margin-top: 4px;
+    }
   }
 
   .page_actions {
@@ -63,7 +87,7 @@ defineProps({
     .extra_actions {
       :deep(.arco-btn) {
         color: var(--color-text-1);
-        font-size: 20px;
+        font-size: 14px;
 
         &:hover {
           background-color: var(--color-fill-3);

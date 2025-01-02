@@ -122,15 +122,19 @@ const handleCurrencyClick = (currency) => {
 
 <template>
   <div class="rate_wrapper">
-    <PageTitle title="货币汇率">
+    <PageTitle
+      title="货币汇率"
+      sub-title="汇率仅供参考，请以实际交易为准">
       <!-- 添加设置按钮 -->
       <template #extra>
         <a-tooltip content="设置">
           <a-button
             type="text"
+            @click="settingVisible = true"
             size="small">
+            编辑货币
             <template #icon>
-              <icon-settings @click="settingVisible = true" />
+              <icon-settings />
             </template>
           </a-button>
         </a-tooltip>
@@ -155,7 +159,8 @@ const handleCurrencyClick = (currency) => {
 
         <a-select
           v-model="sourceCurrency"
-          placeholder="选���货币"
+          placeholder="请选择货币"
+          allow-search
           class="currency_select">
           <a-option
             v-for="item in rateList"
@@ -186,25 +191,28 @@ const handleCurrencyClick = (currency) => {
       <div
         v-for="currency in enabledCurrencies"
         :key="currency.name"
-        class="currency_item"
         @click="handleCurrencyClick(currency)">
-        <div class="currency_icon">
-          <img
-            :src="getCurrencyIcon(currency.name)"
-            :alt="currency.name" />
-        </div>
-        <div class="currency_info">
-          <div class="currency_name">
-            {{ currency.name }} - {{ currency.label }}
+        <a-tooltip :content="`查看${sourceCurrency}兑${currency.name}汇率趋势`">
+          <div class="currency_item">
+            <div class="currency_icon">
+              <img
+                :src="getCurrencyIcon(currency.name)"
+                :alt="currency.name" />
+            </div>
+            <div class="currency_info">
+              <div class="currency_name">
+                {{ currency.name }} - {{ currency.label }}
+              </div>
+              <div class="currency_value">
+                <CountTo
+                  :start-val="0"
+                  :end-val="Number(currency.value) || 0"
+                  :duration="500"
+                  :decimals="2" />
+              </div>
+            </div>
           </div>
-          <div class="currency_value">
-            <CountTo
-              :start-val="0"
-              :end-val="Number(currency.value) || 0"
-              :duration="500"
-              :decimals="2" />
-          </div>
-        </div>
+        </a-tooltip>
       </div>
     </div>
 
